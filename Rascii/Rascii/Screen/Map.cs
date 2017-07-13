@@ -95,30 +95,42 @@ namespace Rascii.Screen
             double x, y;
             int i;
 
+            // 360 rays around the location.
             for(i = 0; i < 360; i ++)
             {
-                x = Math.Cos(i * 0.01745f);
-                y = Math.Sin(i * 0.01745f);
+                // Calculating the increment of both x and y.
+                x = Math.Cos(i * Project.tileSize);
+                y = Math.Sin(i * Project.tileSize);
+                // Passing the values to calculate the FOV.
                 DoFOV(x, y);
             }
         }
 
         private void DoFOV(double x, double y)
         {
+            // i increment, so player can have an awareness variable, higher awareness means more blocks will be visible.
             int i;
             double oX, oY;
+            // Get the cell X and Y of the players current cell.
             oX = player.GetCell().GetCoordinates().X;
             oY = player.GetCell().GetCoordinates().Y;
 
+            // increment i and check up to the players awareness.
             for(i = 0; i < player.awareness; i++)
             {
-                cells[(int)oX, (int)oY].SetVisible(true);
-                if(cells[(int)oX, (int)oY].GetValue() == "#")
+                if (oX > 0 && oY > 0 && oX < Project.mapWidth / Project.tileSize && oY < Project.mapHeight / Project.tileSize)
                 {
-                    return;
+                    // set the cell to visible first.
+                    cells[(int)oX, (int)oY].SetVisible(true);
+                    // if the cell is a wall, we need to return and stop the checks.
+                    if (cells[(int)oX, (int)oY].GetValue() == "#")
+                    {
+                        return;
+                    }
+                    // else we will go to the next block to check.
+                    oX += x;
+                    oY += y;
                 }
-                oX += x;
-                oY += y;
             }
         }
 
@@ -130,6 +142,7 @@ namespace Rascii.Screen
                 {
                     for (int j = room.y; j < room.y + room.height; j++)
                     {
+                        // We change every tile of the room in to the correct value, the surrounding tiles are always walls. Kinda uneccesary, because they are anyway.
                         if (i == room.x || j == room.y || i == room.x + room.width - 1 || j == room.y + room.height - 1)
                         {
                             cells[i, j].SetValue("#");
@@ -146,8 +159,9 @@ namespace Rascii.Screen
                 }
             }
 
-            player = new Player(cells[(int)rooms[0].Center().X, (int)rooms[0].Center().Y]);
             ConnectRooms();
+            // Need to spawn the player after map generation, else sometimes the halls overwrite the player.
+            player = new Player(cells[(int)rooms[0].Center().X, (int)rooms[0].Center().Y]);
         }
 
         private void ConnectRooms()
