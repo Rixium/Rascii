@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rascii.Screen
 {
-    class Inventory : Content
+    public class Inventory : Content
     {
 
         public Inventory()

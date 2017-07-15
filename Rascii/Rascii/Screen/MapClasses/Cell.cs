@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rascii.Screen.MapClasses
 {
-    class Cell
+    public class Cell
     {
 
         String value;
@@ -20,6 +20,7 @@ namespace Rascii.Screen.MapClasses
         Color backColor, oldBackColor;
         bool visible = false;
         bool beenVisible = false;
+        bool walkable;
 
         public Cell(int x, int y, string value, Color color, Color backcolor, int xCord, int yCord)
         {
@@ -67,6 +68,11 @@ namespace Rascii.Screen.MapClasses
         {
             this.oldValue = this.value;
             this.value = value;
+
+            if(this.value == ".")
+            {
+                walkable = true;
+            }
         }
 
         public void SetVisible(bool visible)
@@ -105,5 +111,11 @@ namespace Rascii.Screen.MapClasses
         {
             return visible;
         }
+
+        public bool GetWalkable()
+        {
+            return walkable;
+        }
+
     }
 }

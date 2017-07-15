@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Rascii.Screen
 {
-    class Map : Content
+    public class Map : Content
     {
         int x, y;
 
@@ -23,7 +23,7 @@ namespace Rascii.Screen
 
         private List<Room> rooms = new List<Room>();
 
-        Random random = new Random();
+        Random random;
 
         KeyboardState lastState;
 
@@ -31,10 +31,12 @@ namespace Rascii.Screen
         {
             this.x = x;
             this.y = y;
-
-            maxRooms = 20;
-            maxRoomSize = 15;
-            minRoomSize = 5;
+            Random seedGetter = new Random();
+            int seed = seedGetter.Next(0, 5000000);
+            random = new Random(seed);
+            maxRooms = 7;
+            maxRoomSize = 20;
+            minRoomSize = 10;
 
             for(int i = 0; i < Project.mapWidth / Project.tileSize; i++)
             {
@@ -77,12 +79,13 @@ namespace Rascii.Screen
                 if(canAdd)
                 {
                     rooms.Add(new Room(newRoom, roomX, roomY, roomWidth, roomHeight));
-                    Console.WriteLine("Creating Room");
                     createdRooms++;
                 }
             }
 
             CreateRooms();
+            Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
+            messages.AddMessage(String.Format("Map created with seed {0}", seed));
         }
 
         private void CheckFOV()
@@ -112,18 +115,18 @@ namespace Rascii.Screen
             int i;
             double oX, oY;
             // Get the cell X and Y of the players current cell.
-            oX = player.GetCell().GetCoordinates().X;
-            oY = player.GetCell().GetCoordinates().Y;
+            oX = player.GetCell().GetCoordinates().X * Project.tileSize + Project.tileSize / 2;
+            oY = player.GetCell().GetCoordinates().Y * Project.tileSize + Project.tileSize / 2;
 
             // increment i and check up to the players awareness.
-            for(i = 0; i < player.awareness; i++)
+            for(i = 0; i < player.GetStats().awareness * Project.tileSize; i++)
             {
-                if (oX > 0 && oY > 0 && oX < Project.mapWidth / Project.tileSize && oY < Project.mapHeight / Project.tileSize)
+                if (oX > 0 && oY > 0 && oX < Project.mapWidth && oY < Project.mapHeight)
                 {
                     // set the cell to visible first.
-                    cells[(int)oX, (int)oY].SetVisible(true);
+                    cells[(int)oX / Project.tileSize, (int)oY / Project.tileSize].SetVisible(true);
                     // if the cell is a wall, we need to return and stop the checks.
-                    if (cells[(int)oX, (int)oY].GetValue() == "#")
+                    if (cells[(int)oX / Project.tileSize, (int)oY / Project.tileSize].GetValue() == "#")
                     {
                         return;
                     }
@@ -226,7 +229,8 @@ namespace Rascii.Screen
                     spriteBatch.DrawString(ContentChest.Instance.gamefont, cell.GetValue(), cell.GetPosition(), cell.GetColor());
                 } else if (cell.GetBeenVisible())
                 {
-                    spriteBatch.Draw(ContentChest.Instance.pixel, new Rectangle((int)cell.GetPosition().X, (int)cell.GetPosition().Y, Project.tileSize, Project.tileSize), Color.White * 0.1f);
+                    spriteBatch.Draw(ContentChest.Instance.pixel, new Rectangle((int)cell.GetPosition().X, (int)cell.GetPosition().Y, Project.tileSize, Project.tileSize), Color.Black);
+                    spriteBatch.DrawString(ContentChest.Instance.gamefont, cell.GetValue(), cell.GetPosition(), cell.GetColor());
                 }
             }
         }
@@ -238,24 +242,24 @@ namespace Rascii.Screen
             Cell playersCell = player.GetCell();
             if(keyState.IsKeyDown(KeyBindings.LEFT) && lastState.IsKeyUp(KeyBindings.LEFT))
             {
-                if (cells[(int)playersCell.GetCoordinates().X - 1, (int)playersCell.GetCoordinates().Y].GetValue() == ".") {
+                if (cells[(int)playersCell.GetCoordinates().X - 1, (int)playersCell.GetCoordinates().Y].GetWalkable()) {
                     player.SetCell(cells[(int)playersCell.GetCoordinates().X - 1, (int)playersCell.GetCoordinates().Y]);
                 }
             } else if (keyState.IsKeyDown(KeyBindings.RIGHT) && lastState.IsKeyUp(KeyBindings.RIGHT))
             {
-                if (cells[(int)playersCell.GetCoordinates().X + 1, (int)playersCell.GetCoordinates().Y].GetValue() == ".")
+                if (cells[(int)playersCell.GetCoordinates().X + 1, (int)playersCell.GetCoordinates().Y].GetWalkable())
                 {
                     player.SetCell(cells[(int)playersCell.GetCoordinates().X + 1, (int)playersCell.GetCoordinates().Y]);
                 }
             } else if(keyState.IsKeyDown(KeyBindings.UP) && lastState.IsKeyUp(KeyBindings.UP))
             {
-                if (cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y - 1].GetValue() == ".")
+                if (cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y - 1].GetWalkable())
                 {
                     player.SetCell(cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y - 1]);
                 }
             } else if (keyState.IsKeyDown(KeyBindings.DOWN) && lastState.IsKeyUp(KeyBindings.DOWN))
             {
-                if (cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y + 1].GetValue() == ".")
+                if (cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y + 1].GetWalkable())
                 {
                     player.SetCell(cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y + 1]);
                 }

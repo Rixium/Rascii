@@ -3,27 +3,38 @@ using System;
 
 namespace Rascii.Screen.MapClasses
 {
-    class Player
+    public class Player
     {
 
         Cell currentCell;
-
-        public string name = "Player";
-        public int level = 1;
-        public int currHealth = 10;
-        public int maxHealth = 10;
-        public int attack = 1;
-        public int defence = 1;
-        public int gold = 0;
-        public int awareness = 8;
-
+        string name = "Player";
+        EntityStats stats;
 
         public Player(Cell cell)
         {
-            this.currentCell = cell;
+            GameManager.player = this;
+            currentCell = cell;
             currentCell.SetValue("@");
             currentCell.SetColor(CellColors.PLAYER);
+            Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
+            messages.AddMessage(String.Format("Player spawned at {0}:{1}", cell.GetCoordinates().X, cell.GetCoordinates().Y));
+            stats = new EntityStats(name);
+            ResetStats();
         }
+
+        public void ResetStats()
+        {
+            stats.level = 1;
+            stats.currHealth = 100;
+            stats.maxHealth = 100;
+            stats.attack = 2;
+            stats.attackChance = 50;
+            stats.defenceChance = 50;
+            stats.defence = 2;
+            stats.gold = 0;
+            stats.awareness = 8;
+            stats.speed = 10;
+    }
         
 
         public Cell GetCell()
@@ -33,19 +44,24 @@ namespace Rascii.Screen.MapClasses
 
         public void SetCell(Cell cell)
         {
-            this.currentCell.RemoveEntity();
-            this.currentCell = cell;
+            currentCell.RemoveEntity();
+            currentCell = cell;
             cell.SetValue("@");
             cell.SetColor(CellColors.PLAYER);
         }
 
         public bool CanSee(Cell cell)
         {
-            if(Math.Abs(cell.GetCoordinates().X - currentCell.GetCoordinates().X) < awareness && Math.Abs(cell.GetCoordinates().Y - currentCell.GetCoordinates().Y ) < awareness) {
+            if(Math.Abs(cell.GetCoordinates().X - currentCell.GetCoordinates().X) < stats.awareness && Math.Abs(cell.GetCoordinates().Y - currentCell.GetCoordinates().Y ) < stats.awareness) {
                 return true;
             } else {
                 return false;
             }
+        }
+
+        public EntityStats GetStats()
+        {
+            return this.stats;
         }
     }
 }

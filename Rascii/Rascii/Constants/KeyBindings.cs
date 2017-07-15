@@ -14,6 +14,7 @@ namespace Rascii.Constants
         public static Keys DOWN = Keys.S;
         public static Keys LEFT = Keys.A;
         public static Keys RIGHT = Keys.D;
-
+        public static Keys UPMESSAGE = Keys.OemPlus;
+        public static Keys DOWNMESSAGE = Keys.OemMinus;
     }
 }

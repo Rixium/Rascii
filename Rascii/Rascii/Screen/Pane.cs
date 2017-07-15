@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Rascii.Screen
 {
-    class Pane
+    public class Pane
     {
 
         Rectangle rectangle;
@@ -41,6 +41,11 @@ namespace Rascii.Screen
             {
                 content.Draw(spriteBatch);
             }
+        }
+
+        public Content GetContent()
+        {
+            return this.content;
         }
 
     }

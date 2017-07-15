@@ -14,10 +14,11 @@ namespace Rascii
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         ContentChest contentChest;
-        List<Pane> panes = new List<Pane>();
+        Dictionary<string, Pane> panes = new Dictionary<string, Pane>();
 
         public Game1()
         {
+            GameManager.game = this;
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
@@ -34,13 +35,14 @@ namespace Rascii
             graphics.PreferredBackBufferHeight = Project.screenHeight;
             graphics.ApplyChanges();
 
-            Map map = new Map(0, Project.inventoryHeight);
-            panes.Add(new Pane(Project.screenWidth, Project.screenHeight, 0, 0, Color.Black, "", null));
-            panes.Add(new Pane(Project.inventoryWidth, Project.inventoryHeight, 0, 0, Color.Black, "Inventory", new Inventory()));
-
-            panes.Add(new Pane(Project.mapWidth, Project.mapHeight, 0, Project.inventoryHeight, Color.Black, "Map", map));
-            panes.Add(new Pane(Project.statWidth, Project.statHeight, Project.inventoryWidth, 0, Color.Black, "Stats", new Stats(Project.inventoryWidth, 0, map.GetPlayer())));
-            panes.Add(new Pane(Project.messageWidth, Project.messageWidth, 0, Project.inventoryHeight + Project.mapHeight, Color.Black, "Messages", new Messages()));
+            
+            panes.Add("none", new Pane(Project.screenWidth, Project.screenHeight, 0, 0, Color.Black, "", null));
+            panes.Add("inventory", new Pane(Project.inventoryWidth, Project.inventoryHeight, Project.statWidth, 0, Color.Black, "Inventory", new Inventory()));
+            
+            panes.Add("messages", new Pane(Project.messageWidth, Project.messageHeight, Project.statWidth, Project.inventoryHeight + Project.mapHeight, Color.Black, "Messages", new Messages(Project.statWidth, Project.inventoryHeight + Project.mapHeight, Project.messageHeight)));
+            Map map = new Map(Project.statWidth, Project.inventoryHeight);
+            panes.Add("map", new Pane(Project.mapWidth, Project.mapHeight, Project.statWidth, Project.inventoryHeight, Color.Black, "Map", map));
+            panes.Add("stats", new Pane(Project.statWidth, Project.statHeight, 0, 0, Color.Black, "Stats", new Stats(0, 0, map.GetPlayer())));
 
             base.Initialize();
         }
@@ -50,6 +52,11 @@ namespace Rascii
             spriteBatch = new SpriteBatch(GraphicsDevice);
         }
 
+        public Pane GetPane(string pane)
+        {
+            return panes[pane];
+        }
+
         protected override void UnloadContent()
         {
 
@@ -57,9 +64,9 @@ namespace Rascii
 
         protected override void Update(GameTime gameTime)
         {
-            foreach (Pane pane in panes)
+            foreach (KeyValuePair<string, Pane> pane in panes)
             {
-                pane.Update();
+                pane.Value.Update();
             }
 
             base.Update(gameTime);
@@ -70,9 +77,9 @@ namespace Rascii
             GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
-            foreach (Pane pane in panes)
+            foreach (KeyValuePair<string, Pane> pane in panes)
             {
-                pane.Draw(spriteBatch);
+                pane.Value.Draw(spriteBatch);
             }
             spriteBatch.End();
 

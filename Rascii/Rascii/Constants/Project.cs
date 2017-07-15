@@ -22,5 +22,7 @@
 
         public static int inventoryWidth = 80 * tileSize;
         public static int inventoryHeight = 11 * tileSize;
+
+        public static int panePadding = 10;
     }
 }

@@ -46,6 +46,7 @@
     <Compile Include="Constants\GameManager.cs" />
     <Compile Include="Constants\KeyBindings.cs" />
     <Compile Include="Constants\Project.cs" />
+    <Compile Include="Constants\Swatch.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="Screen\Inventory.cs" />
     <Compile Include="Screen\Map.cs" />
     <Compile Include="Screen\MapClasses\Cell.cs" />
+    <Compile Include="Screen\MapClasses\EntityStats.cs" />
     <Compile Include="Screen\MapClasses\Player.cs" />
     <Compile Include="Screen\MapClasses\Room.cs" />
     <Compile Include="Screen\Messages.cs" />

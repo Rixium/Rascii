@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rascii.Screen
 {
-    class Content
+    public class Content
     {
 
         public virtual void Update()

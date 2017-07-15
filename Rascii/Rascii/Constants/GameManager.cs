@@ -1,9 +1,4 @@
 ﻿using Rascii.Screen.MapClasses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rascii.Constants
 {
@@ -11,6 +6,7 @@ namespace Rascii.Constants
     {
 
         public static Player player;
+        public static Game1 game;
 
     }
 }
