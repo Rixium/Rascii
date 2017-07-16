@@ -1,4 +1,6 @@
-﻿namespace Rascii.Screen.MapClasses
+﻿using Rascii.Util;
+
+namespace Rascii.Screen.MapClasses
 {
 
     public class EntityStats
@@ -18,6 +20,19 @@
         public EntityStats(string name)
         {
             this.name = name;
+        }
+
+        public void Roll()
+        {
+            attack = Dice.Roll(1, 3) + level / 3;
+            attackChance = Dice.Roll(25, 3);
+            awareness = 10;
+            defence = Dice.Roll(1, 3) + level / 3;
+            defenceChance = Dice.Roll(10, 4);
+            gold = Dice.Roll(5, 5);
+            currHealth = 100;
+            maxHealth = 100;
+            speed = 14;
         }
     }
 }

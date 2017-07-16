@@ -43,6 +43,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Constants\CellColors.cs" />
+    <Compile Include="Constants\EnemyTypes.cs" />
+    <Compile Include="Constants\EntityTypes.cs" />
     <Compile Include="Constants\GameManager.cs" />
     <Compile Include="Constants\KeyBindings.cs" />
     <Compile Include="Constants\Project.cs" />
@@ -54,6 +56,8 @@
     <Compile Include="Screen\Inventory.cs" />
     <Compile Include="Screen\Map.cs" />
     <Compile Include="Screen\MapClasses\Cell.cs" />
+    <Compile Include="Screen\MapClasses\Enemy.cs" />
+    <Compile Include="Screen\MapClasses\Entity.cs" />
     <Compile Include="Screen\MapClasses\EntityStats.cs" />
     <Compile Include="Screen\MapClasses\Player.cs" />
     <Compile Include="Screen\MapClasses\Room.cs" />
@@ -61,6 +65,7 @@
     <Compile Include="Screen\Pane.cs" />
     <Compile Include="Screen\Stats.cs" />
     <Compile Include="Util\ContentChest.cs" />
+    <Compile Include="Util\Dice.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

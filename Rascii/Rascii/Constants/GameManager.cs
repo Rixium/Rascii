@@ -1,4 +1,5 @@
-﻿using Rascii.Screen.MapClasses;
+﻿using Rascii.Screen;
+using Rascii.Screen.MapClasses;
 
 namespace Rascii.Constants
 {
@@ -7,6 +8,7 @@ namespace Rascii.Constants
 
         public static Player player;
         public static Game1 game;
+        public static Stats statPanel;
 
     }
 }

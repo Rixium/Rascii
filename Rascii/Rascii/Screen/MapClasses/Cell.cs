@@ -21,6 +21,7 @@ namespace Rascii.Screen.MapClasses
         bool visible = false;
         bool beenVisible = false;
         bool walkable;
+        Entity entity;
 
         public Cell(int x, int y, string value, Color color, Color backcolor, int xCord, int yCord)
         {
@@ -75,6 +76,14 @@ namespace Rascii.Screen.MapClasses
             }
         }
 
+        public void Update()
+        {
+            if(entity != null)
+            {
+                entity.Update();
+            }
+        }
+
         public void SetVisible(bool visible)
         {
             this.visible = visible;
@@ -93,6 +102,40 @@ namespace Rascii.Screen.MapClasses
         {
             this.value = oldValue;
             this.color = oldColor;
+            this.entity = null;
+            this.walkable = true;
+        }
+
+        public bool HasEntity()
+        {
+            if(entity != null)
+            {
+                return true;
+            } else
+            {
+                if (walkable)
+                {
+                    return false;
+                } else
+                {
+                    return true;
+                }
+            }
+        }
+
+        public Entity GetEntity()
+        {
+            return entity;
+        }
+
+        public void AddEntity(Entity e)
+        {
+            oldColor = color;
+            color = e.color;
+            oldValue = value;
+            value = e.value;
+            entity = e;
+            walkable = false;
         }
 
         public void SetColor(Color color)

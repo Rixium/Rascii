@@ -41,8 +41,9 @@ namespace Rascii
             
             panes.Add("messages", new Pane(Project.messageWidth, Project.messageHeight, Project.statWidth, Project.inventoryHeight + Project.mapHeight, Color.Black, "Messages", new Messages(Project.statWidth, Project.inventoryHeight + Project.mapHeight, Project.messageHeight)));
             Map map = new Map(Project.statWidth, Project.inventoryHeight);
-            panes.Add("map", new Pane(Project.mapWidth, Project.mapHeight, Project.statWidth, Project.inventoryHeight, Color.Black, "Map", map));
             panes.Add("stats", new Pane(Project.statWidth, Project.statHeight, 0, 0, Color.Black, "Stats", new Stats(0, 0, map.GetPlayer())));
+            panes.Add("map", new Pane(Project.mapWidth, Project.mapHeight, Project.statWidth, Project.inventoryHeight, Color.Black, "Map", map));
+            
 
             base.Initialize();
         }

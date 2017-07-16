@@ -3,7 +3,7 @@ using System;
 
 namespace Rascii.Screen.MapClasses
 {
-    public class Player
+    public class Player : Entity
     {
 
         Cell currentCell;
@@ -12,10 +12,12 @@ namespace Rascii.Screen.MapClasses
 
         public Player(Cell cell)
         {
+            value = "@";
+            color = CellColors.PLAYER;
+            entityType = EntityTypes.PLAYER;
             GameManager.player = this;
             currentCell = cell;
-            currentCell.SetValue("@");
-            currentCell.SetColor(CellColors.PLAYER);
+            currentCell.AddEntity(this);
             Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
             messages.AddMessage(String.Format("Player spawned at {0}:{1}", cell.GetCoordinates().X, cell.GetCoordinates().Y));
             stats = new EntityStats(name);
@@ -34,7 +36,7 @@ namespace Rascii.Screen.MapClasses
             stats.gold = 0;
             stats.awareness = 8;
             stats.speed = 10;
-    }
+        }
         
 
         public Cell GetCell()

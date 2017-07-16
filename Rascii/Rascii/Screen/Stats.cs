@@ -15,14 +15,14 @@ namespace Rascii.Screen
     {
 
         Player player;
-        int x, y;
+        public int x, y;
 
         public Stats(int x, int y, Player player)
         {
             this.x = x;
             this.y = y;
             this.player = player;
-
+            GameManager.statPanel = this;
         }
 
         public override void Update()

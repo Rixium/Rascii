@@ -84,8 +84,25 @@ namespace Rascii.Screen
             }
 
             CreateRooms();
+            Populate();
             Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
             messages.AddMessage(String.Format("Map created with seed {0}", seed));
+        }
+
+        private void Populate()
+        {
+            Random r = new Random(Guid.NewGuid().GetHashCode());
+            foreach (Cell cell in cells)
+            {
+                if(!cell.HasEntity())
+                {
+                    if(r.Next(0, 1000) < 10)
+                    {
+                        int enemyType = r.Next(0, EnemyTypes.ENEMYTYPES);
+                        cell.AddEntity(new Enemy(1, enemyType));
+                    }
+                }
+            }
         }
 
         private void CheckFOV()
@@ -220,13 +237,39 @@ namespace Rascii.Screen
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
-
+            int i = 1;
             foreach(Cell cell in cells)
             {
                 if (cell.GetVisible())
                 {
                     spriteBatch.Draw(ContentChest.Instance.pixel, new Rectangle((int)cell.GetPosition().X, (int)cell.GetPosition().Y, Project.tileSize, Project.tileSize), cell.GetBackColor());
                     spriteBatch.DrawString(ContentChest.Instance.gamefont, cell.GetValue(), cell.GetPosition(), cell.GetColor());
+
+                    if(cell.GetEntity() != null)
+                    {
+                        Entity e = cell.GetEntity();
+                        if(e.entityType == EntityTypes.ENEMY)
+                        {
+                            Enemy enemy = (Enemy)e;
+                            float remainingWidth = Project.statWidth - (int)(Project.panePadding * 2 + ContentChest.Instance.gamefont.MeasureString(String.Format("{0}:", enemy.value)).X);
+                            float actualWidth = ((float)enemy.GetStats().currHealth / (float)enemy.GetStats().maxHealth) * remainingWidth;
+
+                            enemy.Update();
+                            // Draw value.
+                            spriteBatch.DrawString(ContentChest.Instance.gamefont, String.Format("{0}:", enemy.value), new Vector2(GameManager.statPanel.x + Project.panePadding, GameManager.statPanel.y + 200 + (i * (ContentChest.Instance.gamefont.MeasureString(enemy.GetStats().name).Y + Project.linePadding))), enemy.color);
+
+                            // Draw health bar.
+                            spriteBatch.Draw(ContentChest.Instance.pixel, new Rectangle((int)(GameManager.statPanel.x + (Project.panePadding * 2) + ContentChest.Instance.gamefont.MeasureString(String.Format("{0}:", enemy.value)).X),
+                                (int)(GameManager.statPanel.y + 200 + (i * (ContentChest.Instance.gamefont.MeasureString(enemy.GetStats().name).Y + Project.linePadding))), (int)actualWidth, 
+                                (int)ContentChest.Instance.gamefont.MeasureString(enemy.GetStats().name).Y), Swatch.PrimaryDarkest);
+
+                            // Draw name on top of health bar.
+                            spriteBatch.DrawString(ContentChest.Instance.gamefont, String.Format("{0}", enemy.GetStats().name),
+                                new Vector2(GameManager.statPanel.x + (Project.panePadding * 2) + ContentChest.Instance.gamefont.MeasureString(String.Format("{0}:", enemy.value)).X, 
+                                GameManager.statPanel.y + 200 + (i * (ContentChest.Instance.gamefont.MeasureString(enemy.GetStats().name).Y + Project.linePadding))), Color.White);
+                            i++;
+                        }
+                    }
                 } else if (cell.GetBeenVisible())
                 {
                     spriteBatch.Draw(ContentChest.Instance.pixel, new Rectangle((int)cell.GetPosition().X, (int)cell.GetPosition().Y, Project.tileSize, Project.tileSize), Color.Black);
