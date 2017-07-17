@@ -55,7 +55,7 @@ namespace Rascii.Screen
 
             if(ks.IsKeyDown(KeyBindings.DOWNMESSAGE) && ls.IsKeyUp(KeyBindings.DOWNMESSAGE))
             {
-                if (currentStart < messages.Count)
+                if (currentStart < messages.Count - maxMessageView)
                 {
                     currentStart++;
                 }
@@ -71,10 +71,13 @@ namespace Rascii.Screen
 
         public void AddMessage(string message)
         {
-            messages.Insert(0, message);
+            messages.Add(message);
             if(messages.Count > maxMessageHistory)
             {
-                messages.RemoveAt(messages.Count);
+                messages.RemoveAt(0);
+            } else if(messages.Count > maxMessageView)
+            {
+                currentStart++;
             }
         }
     }

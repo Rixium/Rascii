@@ -41,6 +41,7 @@ namespace Rascii.Screen
             spriteBatch.DrawString(ContentChest.Instance.gamefont, String.Format("Attack: {0} ({1}%)",player.GetStats().attack, player.GetStats().attackChance), new Vector2(x + 10, y + 70), Color.White);
             spriteBatch.DrawString(ContentChest.Instance.gamefont, String.Format("Defence: {0} ({1}%)",player.GetStats().defence, player.GetStats().defenceChance), new Vector2(x + 10, y + 90), Color.White);
             spriteBatch.DrawString(ContentChest.Instance.gamefont, "Gold: " + player.GetStats().gold, new Vector2(x + 10, y + 110), CellColors.GOLD);
+            spriteBatch.DrawString(ContentChest.Instance.gamefont, "Turn: " + GameManager.turn, new Vector2(x + 10, y + 130), Color.White);
         }
 
     }

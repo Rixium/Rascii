@@ -10,7 +10,7 @@ namespace Rascii.Screen.MapClasses
         public Color color;
         public string value;
 
-        public virtual void Update()
+        public virtual void Update(Cell cell)
         {
 
         }

@@ -22,6 +22,7 @@ namespace Rascii.Screen
         private int minRoomSize = 0;
 
         private List<Room> rooms = new List<Room>();
+        private bool playerTurn = true;
 
         Random random;
 
@@ -83,18 +84,27 @@ namespace Rascii.Screen
                 }
             }
 
+            
             CreateRooms();
+            
+            foreach(Cell cell in cells)
+            {
+                cell.startValue = cell.GetValue();
+            }
+
             Populate();
             Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
             messages.AddMessage(String.Format("Map created with seed {0}", seed));
+            GameManager.level = this;
         }
 
         private void Populate()
         {
             Random r = new Random(Guid.NewGuid().GetHashCode());
+
             foreach (Cell cell in cells)
             {
-                if(!cell.HasEntity())
+                if(!cell.HasEntity() && cell.GetWalkable())
                 {
                     if(r.Next(0, 1000) < 10)
                     {
@@ -103,6 +113,11 @@ namespace Rascii.Screen
                     }
                 }
             }
+        }
+
+        public Cell[,] GetCells()
+        {
+            return cells;
         }
 
         private void CheckFOV()
@@ -230,7 +245,25 @@ namespace Rascii.Screen
         public override void Update()
         {
             base.Update();
-            CheckKeys();
+            if (playerTurn)
+            {
+                CheckKeys();
+            }
+
+            if (!playerTurn)
+            {
+                foreach (Cell cell in cells)
+                {
+                    cell.Update();
+                }
+                playerTurn = true;
+                GameManager.turn++;
+                foreach(Cell cell in cells)
+                {
+                    cell.Reset();
+                }
+            }
+
             CheckFOV();
         }
 
@@ -242,19 +275,15 @@ namespace Rascii.Screen
             {
                 if (cell.GetVisible())
                 {
-                    spriteBatch.Draw(ContentChest.Instance.pixel, new Rectangle((int)cell.GetPosition().X, (int)cell.GetPosition().Y, Project.tileSize, Project.tileSize), cell.GetBackColor());
-                    spriteBatch.DrawString(ContentChest.Instance.gamefont, cell.GetValue(), cell.GetPosition(), cell.GetColor());
-
                     if(cell.GetEntity() != null)
                     {
                         Entity e = cell.GetEntity();
                         if(e.entityType == EntityTypes.ENEMY)
                         {
                             Enemy enemy = (Enemy)e;
+
                             float remainingWidth = Project.statWidth - (int)(Project.panePadding * 2 + ContentChest.Instance.gamefont.MeasureString(String.Format("{0}:", enemy.value)).X);
                             float actualWidth = ((float)enemy.GetStats().currHealth / (float)enemy.GetStats().maxHealth) * remainingWidth;
-
-                            enemy.Update();
                             // Draw value.
                             spriteBatch.DrawString(ContentChest.Instance.gamefont, String.Format("{0}:", enemy.value), new Vector2(GameManager.statPanel.x + Project.panePadding, GameManager.statPanel.y + 200 + (i * (ContentChest.Instance.gamefont.MeasureString(enemy.GetStats().name).Y + Project.linePadding))), enemy.color);
 
@@ -269,6 +298,15 @@ namespace Rascii.Screen
                                 GameManager.statPanel.y + 200 + (i * (ContentChest.Instance.gamefont.MeasureString(enemy.GetStats().name).Y + Project.linePadding))), Color.White);
                             i++;
                         }
+
+                        spriteBatch.Draw(ContentChest.Instance.pixel, new Rectangle((int)cell.GetPosition().X, (int)cell.GetPosition().Y, Project.tileSize, Project.tileSize), cell.GetBackColor());
+                        spriteBatch.DrawString(ContentChest.Instance.gamefont, e.value, cell.GetPosition(), e.color);
+
+                    } else
+                    {
+                        spriteBatch.Draw(ContentChest.Instance.pixel, new Rectangle((int)cell.GetPosition().X, (int)cell.GetPosition().Y, Project.tileSize, Project.tileSize), cell.GetBackColor());
+                        spriteBatch.DrawString(ContentChest.Instance.gamefont, cell.GetValue(), cell.GetPosition(), cell.GetColor());
+
                     }
                 } else if (cell.GetBeenVisible())
                 {
@@ -283,29 +321,77 @@ namespace Rascii.Screen
             KeyboardState keyState = Keyboard.GetState();
 
             Cell playersCell = player.GetCell();
-            if(keyState.IsKeyDown(KeyBindings.LEFT) && lastState.IsKeyUp(KeyBindings.LEFT))
+            if (keyState.IsKeyDown(KeyBindings.LEFT) && lastState.IsKeyUp(KeyBindings.LEFT))
             {
-                if (cells[(int)playersCell.GetCoordinates().X - 1, (int)playersCell.GetCoordinates().Y].GetWalkable()) {
+                Cell cell = cells[(int)playersCell.GetCoordinates().X - 1, (int)playersCell.GetCoordinates().Y];
+                if (cell.GetWalkable())
+                {
                     player.SetCell(cells[(int)playersCell.GetCoordinates().X - 1, (int)playersCell.GetCoordinates().Y]);
                 }
-            } else if (keyState.IsKeyDown(KeyBindings.RIGHT) && lastState.IsKeyUp(KeyBindings.RIGHT))
+                else if (cell.GetEntity() != null)
+                {
+                    if (cell.GetEntity().entityType == EntityTypes.ENEMY)
+                    {
+                        Enemy enemy = (Enemy)cell.GetEntity();
+                        player.Attack(enemy);
+                    }
+                }
+                playerTurn = false;
+            }
+            else if (keyState.IsKeyDown(KeyBindings.RIGHT) && lastState.IsKeyUp(KeyBindings.RIGHT))
             {
-                if (cells[(int)playersCell.GetCoordinates().X + 1, (int)playersCell.GetCoordinates().Y].GetWalkable())
+                Cell cell = cells[(int)playersCell.GetCoordinates().X + 1, (int)playersCell.GetCoordinates().Y];
+                if (cell.GetWalkable())
                 {
                     player.SetCell(cells[(int)playersCell.GetCoordinates().X + 1, (int)playersCell.GetCoordinates().Y]);
                 }
-            } else if(keyState.IsKeyDown(KeyBindings.UP) && lastState.IsKeyUp(KeyBindings.UP))
+                else if (cell.GetEntity() != null)
+                {
+                    if (cell.GetEntity().entityType == EntityTypes.ENEMY)
+                    {
+                        Enemy enemy = (Enemy)cell.GetEntity();
+                        player.Attack(enemy);
+                    }
+                }
+                playerTurn = false;
+            }
+            else if (keyState.IsKeyDown(KeyBindings.UP) && lastState.IsKeyUp(KeyBindings.UP))
             {
-                if (cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y - 1].GetWalkable())
+                Cell cell = cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y - 1];
+                if (cell.GetWalkable())
                 {
                     player.SetCell(cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y - 1]);
                 }
-            } else if (keyState.IsKeyDown(KeyBindings.DOWN) && lastState.IsKeyUp(KeyBindings.DOWN))
+                else if (cell.GetEntity() != null)
+                {
+                    if (cell.GetEntity().entityType == EntityTypes.ENEMY)
+                    {
+                        Enemy enemy = (Enemy)cell.GetEntity();
+                        player.Attack(enemy);
+                    }
+                }
+                playerTurn = false;
+            }
+            else if (keyState.IsKeyDown(KeyBindings.DOWN) && lastState.IsKeyUp(KeyBindings.DOWN))
             {
-                if (cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y + 1].GetWalkable())
+                Cell cell = cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y + 1];
+                if (cell.GetWalkable())
                 {
                     player.SetCell(cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y + 1]);
                 }
+                else if (cell.GetEntity() != null)
+                {
+                    if (cell.GetEntity().entityType == EntityTypes.ENEMY)
+                    {
+                        Enemy enemy = (Enemy)cell.GetEntity();
+                        player.Attack(enemy);
+                    }
+                }
+                playerTurn = false;
+            }
+            else if (keyState.IsKeyDown(KeyBindings.SKIP) && lastState.IsKeyUp(KeyBindings.SKIP))
+            {
+                playerTurn = false;
             }
 
             lastState = keyState;

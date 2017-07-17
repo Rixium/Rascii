@@ -9,6 +9,8 @@ namespace Rascii.Constants
         public static Player player;
         public static Game1 game;
         public static Stats statPanel;
+        public static int turn = 0;
+        public static Map level;
 
     }
 }

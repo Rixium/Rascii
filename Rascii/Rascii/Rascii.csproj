@@ -66,6 +66,8 @@
     <Compile Include="Screen\Stats.cs" />
     <Compile Include="Util\ContentChest.cs" />
     <Compile Include="Util\Dice.cs" />
+    <Compile Include="Util\PathFinding.cs" />
+    <Compile Include="Util\Randomizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

@@ -23,11 +23,22 @@ namespace Rascii.Screen.MapClasses
         bool walkable;
         Entity entity;
 
+        // Pathfinding
+        public int fValue = 0;
+        public int hValue = 0;
+        public int gValue = 0;
+        public bool open = true;
+        public Cell parent;
+        public string startValue;
+
+        public bool canUpdate;
+
         public Cell(int x, int y, string value, Color color, Color backcolor, int xCord, int yCord)
         {
             this.x = x;
             this.y = y;
             this.value = value;
+            startValue = value;
             this.pos = new Vector2(x, y);
             this.color = color;
             this.backColor = backcolor;
@@ -76,11 +87,37 @@ namespace Rascii.Screen.MapClasses
             }
         }
 
+        public void Reset()
+        {
+            if(entity != null)
+            {
+                if(entity.entityType == EntityTypes.ENEMY)
+                {
+                    Enemy enemy = (Enemy)entity;
+                    enemy.hasMoved = false;
+                }
+            }
+        }
         public void Update()
         {
             if(entity != null)
             {
-                entity.Update();
+                if (visible)
+                {
+                    entity.Update(this);
+
+                    if (entity != null)
+                    {
+                        if (entity.entityType == EntityTypes.ENEMY)
+                        {
+                            Enemy enemy = (Enemy)entity;
+                            if (enemy.dead)
+                            {
+                                RemoveEntity();
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -98,10 +135,14 @@ namespace Rascii.Screen.MapClasses
             return beenVisible;
         }
 
+        public void ShowPath()
+        {
+            this.color = Color.Red;
+            this.backColor = Color.Red;
+        }
+
         public void RemoveEntity()
         {
-            this.value = oldValue;
-            this.color = oldColor;
             this.entity = null;
             this.walkable = true;
         }
@@ -130,10 +171,6 @@ namespace Rascii.Screen.MapClasses
 
         public void AddEntity(Entity e)
         {
-            oldColor = color;
-            color = e.color;
-            oldValue = value;
-            value = e.value;
             entity = e;
             walkable = false;
         }
