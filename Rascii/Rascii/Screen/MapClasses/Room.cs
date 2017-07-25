@@ -32,5 +32,37 @@ namespace Rascii.Screen.MapClasses
             return new Vector2(x + width / 2, y + height / 2);
         }
 
+        public int Left()
+        {
+            return x;
+        }
+
+        public int Right()
+        {
+            return x + width - 1;
+        }
+
+        public int Top()
+        {
+            return y;
+        }
+
+        public int Bottom()
+        {
+            return y + height - 1;
+        }
+
+        public bool Contains(Cell cell)
+        {
+            if(cell.GetCoordinates().X > Left() && cell.GetCoordinates().X < Right())
+            {
+                if(cell.GetCoordinates().Y > Top() && cell.GetCoordinates().Y < Bottom())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

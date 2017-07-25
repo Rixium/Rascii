@@ -11,6 +11,7 @@ namespace Rascii.Screen.MapClasses
         Cell currentCell;
         string name = "Player";
         EntityStats stats;
+        private bool dead = false;
 
         public Player(Cell cell)
         {
@@ -51,6 +52,15 @@ namespace Rascii.Screen.MapClasses
             currentCell.RemoveEntity();
             currentCell = cell;
             currentCell.AddEntity(this);
+            if(currentCell.isExit)
+            {
+                Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
+                messages.AddMessage(String.Format("Press {0} to proceed to the next level, or continue exploring.", "."));
+            } else if (currentCell.GetValue() == "<")
+            {
+                Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
+                messages.AddMessage(String.Format("You recently descended these stairs."));
+            }
         }
 
         public bool CanSee(Cell cell)
@@ -60,6 +70,39 @@ namespace Rascii.Screen.MapClasses
             } else {
                 return false;
             }
+        }
+
+        public void Hit(int damage)
+        {
+            if (stats.currHealth - damage > 0)
+            {
+                stats.currHealth -= damage;
+            }
+            else
+            {
+                if (!dead)
+                {
+                    stats.currHealth = 0;
+                    dead = true;
+                    Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
+                    messages.AddMessage(String.Format("{0} has died!", stats.name));
+                }
+            }
+        }
+
+        public int Defend()
+        {
+            int blocks = 0;
+
+            for (int i = 0; i < stats.defence; i++)
+            {
+                if (Randomizer.RandomInt(0, 100) > stats.defenceChance)
+                {
+                    blocks += 1;
+                }
+            }
+
+            return blocks;
         }
 
         public void Attack(Enemy e)
@@ -113,5 +156,6 @@ namespace Rascii.Screen.MapClasses
         {
             return this.stats;
         }
+
     }
 }

@@ -31,6 +31,8 @@ namespace Rascii.Screen.MapClasses
         public Cell parent;
         public string startValue;
 
+        public bool isExit = false;
+
         public bool canUpdate;
 
         public Cell(int x, int y, string value, Color color, Color backcolor, int xCord, int yCord)
@@ -169,9 +171,50 @@ namespace Rascii.Screen.MapClasses
             return entity;
         }
 
+        public string GetEntityType()
+        {
+            if(entity != null)
+            {
+                if(entity.entityType == EntityTypes.DOOR)
+                {
+                    Door d = (Door)entity;
+                    if(!d.GetOpen())
+                    {
+                        return "+";
+                    }
+                }
+            }
+            return "";
+        }
+
         public void AddEntity(Entity e)
         {
+            if(e.entityType == EntityTypes.DOOR)
+            {
+                oldValue = e.value;
+                value = e.value;
+                color = e.color;
+            } else if (entity != null)
+            {
+                if (entity.entityType == EntityTypes.DOOR)
+                {
+                    Door d = (Door)entity;
+                    if(d.GetOpen())
+                    {
+                        oldValue = d.value;
+                        value = d.value;
+                    }
+                } else if (entity.entityType == EntityTypes.EXIT)
+                {
+                    Exit ex = (Exit)entity;
+                    oldValue = ex.value;
+                    value = ex.value;
+                    isExit = true;
+                }
+            }
+
             entity = e;
+            
             walkable = false;
         }
 
@@ -185,6 +228,11 @@ namespace Rascii.Screen.MapClasses
         {
             this.oldBackColor = this.backColor;
             this.backColor = color;
+        }
+
+        public void SetWalkable(bool w)
+        {
+            this.walkable = w;
         }
 
         public bool GetVisible()

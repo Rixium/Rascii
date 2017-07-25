@@ -17,5 +17,6 @@ namespace Rascii.Constants
         public static Keys UPMESSAGE = Keys.OemMinus;
         public static Keys DOWNMESSAGE = Keys.OemPlus;
         public static Keys SKIP = Keys.Space;
+        public static Keys PROCEED = Keys.OemPeriod;
     }
 }

@@ -43,6 +43,11 @@ namespace Rascii.Screen
             }
         }
 
+        public void SetContent(Content content)
+        {
+            this.content = content;
+        }
+
         public Content GetContent()
         {
             return this.content;

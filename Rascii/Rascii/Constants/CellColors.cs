@@ -16,5 +16,11 @@ namespace Rascii.Constants
         public static Color GOLD = Swatch.DbSun;
         public static Color SEEN = Swatch.DbDark;
 
+        public static Color DOORBACK = Swatch.ComplimentDarkest;
+        public static Color DOOR = Swatch.ComplimentLighter;
+
+        public static Color EXITBACK = Swatch.ComplimentDarkest;
+        public static Color EXIT = Swatch.ComplimentLighter;
+
     }
 }

@@ -11,6 +11,7 @@ namespace Rascii.Screen.MapClasses
         EntityStats stats;
         public bool dead;
         public bool hasMoved = false;
+        private Cell cell;
 
         public Enemy(int level, int enemyType)
         {
@@ -79,10 +80,52 @@ namespace Rascii.Screen.MapClasses
                     {
                         cell.RemoveEntity();
                         cells[0].AddEntity(this);
+                        this.cell = cells[0];
                     }
+                } else {
+                    Attack();
                 }
                 hasMoved = true;
             }
+        }
+
+        private void Attack()
+        {
+            if (cell != null)
+            {
+                if (GameManager.player.GetCell().GetCoordinates().X == cell.GetCoordinates().X - 1 || GameManager.player.GetCell().GetCoordinates().X == cell.GetCoordinates().X + 1
+                    || GameManager.player.GetCell().GetCoordinates().X == cell.GetCoordinates().X)
+                {
+                    if (GameManager.player.GetCell().GetCoordinates().Y == cell.GetCoordinates().Y - 1 || GameManager.player.GetCell().GetCoordinates().Y == cell.GetCoordinates().Y + 1
+                        || GameManager.player.GetCell().GetCoordinates().Y == cell.GetCoordinates().Y)
+                    {
+                        int hits = 0;
+                        int blocks = 0;
+
+                        for (int i = 0; i < stats.attack; i++)
+                        {
+                            int roll = Randomizer.RandomInt(0, 100);
+
+                            if (roll > stats.attackChance)
+                            {
+                                hits += 1;
+                            }
+                        }
+
+                        if (hits > 0)
+                        {
+                            blocks = GameManager.player.Defend();
+
+                            int successHits = hits - blocks;
+                            successHits = Math.Abs(successHits);
+
+                            GameManager.player.Hit(successHits);
+                        }
+
+                    }
+                }
+            }
+
         }
     }
 }

@@ -22,6 +22,7 @@ namespace Rascii.Screen
         private int minRoomSize = 0;
 
         private List<Room> rooms = new List<Room>();
+        private List<Door> doors = new List<Door>();
         private bool playerTurn = true;
 
         Random random;
@@ -38,6 +39,9 @@ namespace Rascii.Screen
             maxRooms = 7;
             maxRoomSize = 20;
             minRoomSize = 10;
+
+            rooms = new List<Room>();
+            doors = new List<Door>();
 
             for(int i = 0; i < Project.mapWidth / Project.tileSize; i++)
             {
@@ -95,6 +99,87 @@ namespace Rascii.Screen
             Populate();
             Messages messages = (Messages)GameManager.game.GetPane("messages").GetContent();
             messages.AddMessage(String.Format("Map created with seed {0}", seed));
+
+            player = new Player(cells[(int)rooms[0].Center().X, (int)rooms[0].Center().Y]);
+
+            cells[(int)player.GetCell().GetCoordinates().X + 1, (int)player.GetCell().GetCoordinates().Y].SetValue("<");
+            GameManager.level = this;
+        }
+
+        public Map(Player p, int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+            Random seedGetter = new Random();
+            int seed = seedGetter.Next(0, 5000000);
+            random = new Random(seed);
+            maxRooms = 7;
+            maxRoomSize = 20;
+            minRoomSize = 10;
+
+            rooms = new List<Room>();
+            doors = new List<Door>();
+
+            for (int i = 0; i < Project.mapWidth / Project.tileSize; i++)
+            {
+                for (int j = 0; j < Project.mapHeight / Project.tileSize; j++)
+                {
+                    cells[i, j] = new Cell(x + (i * Project.tileSize), y + (j * Project.tileSize), "#", CellColors.WALL, CellColors.WALLBACK, i, j);
+                }
+            }
+
+            int createdRooms = 0;
+
+            while (createdRooms < maxRooms)
+            {
+                int roomWidth = random.Next(minRoomSize, maxRoomSize);
+                int roomHeight = random.Next(minRoomSize, maxRoomSize);
+                int roomX = random.Next(0, Project.mapWidth / Project.tileSize);
+                int roomY = random.Next(0, Project.mapHeight / Project.tileSize);
+
+                Rectangle newRoom = new Rectangle(roomX, roomY, roomWidth, roomHeight);
+
+                bool canAdd = true;
+
+                if (roomX + roomWidth > Project.mapWidth / Project.tileSize || roomY + roomHeight > Project.mapHeight / Project.tileSize)
+                {
+                    canAdd = false;
+                }
+
+                if (canAdd)
+                {
+                    foreach (Room room in rooms)
+                    {
+                        if (newRoom.Intersects(room.GetBounds()))
+                        {
+                            canAdd = false;
+                        }
+                    }
+
+                }
+
+                if (canAdd)
+                {
+                    rooms.Add(new Room(newRoom, roomX, roomY, roomWidth, roomHeight));
+                    createdRooms++;
+                }
+                
+            }
+
+
+            CreateRooms();
+
+            foreach (Cell cell in cells)
+            {
+                cell.startValue = cell.GetValue();
+            }
+
+            Populate();
+            player = p;
+            player.SetCell(cells[(int)rooms[0].Center().X, (int)rooms[0].Center().Y]);
+
+            cells[(int)player.GetCell().GetCoordinates().X + 1, (int)player.GetCell().GetCoordinates().Y].SetValue("<");
+
             GameManager.level = this;
         }
 
@@ -158,7 +243,8 @@ namespace Rascii.Screen
                     // set the cell to visible first.
                     cells[(int)oX / Project.tileSize, (int)oY / Project.tileSize].SetVisible(true);
                     // if the cell is a wall, we need to return and stop the checks.
-                    if (cells[(int)oX / Project.tileSize, (int)oY / Project.tileSize].GetValue() == "#")
+                    Cell c = cells[(int)oX / Project.tileSize, (int)oY / Project.tileSize];
+                    if (c.GetValue() == "#" || c.GetEntityType() == "+")
                     {
                         return;
                     }
@@ -167,6 +253,64 @@ namespace Rascii.Screen
                     oY += y;
                 }
             }
+        }
+
+        private void AddDoors()
+        {
+            foreach(Room room in rooms)
+            {
+                int roomLeft = room.Left();
+                int roomRight = room.Right();
+                int roomTop = room.Top();
+                int roomBottom = room.Bottom();
+
+                List<Cell> edgeCells = new List<Cell>();
+
+                for(int i = roomLeft; i < roomRight; i++)
+                {
+                    edgeCells.Add(cells[i, roomTop]);
+                    edgeCells.Add(cells[i, roomBottom]);
+                }
+                for(int i = roomTop; i < roomBottom; i++)
+                {
+                    edgeCells.Add(cells[roomLeft, i]);
+                    edgeCells.Add(cells[roomRight, i]);
+                }
+
+                foreach(Cell cell in edgeCells)
+                {
+                    if (cell.GetWalkable())
+                    {
+                        Cell leftCell = cells[(int)cell.GetCoordinates().X - 1, (int)cell.GetCoordinates().Y];
+                        Cell rightCell = cells[(int)cell.GetCoordinates().X + 1, (int)cell.GetCoordinates().Y];
+                        Cell topCell = cells[(int)cell.GetCoordinates().X, (int)cell.GetCoordinates().Y - 1];
+                        Cell bottomCell = cells[(int)cell.GetCoordinates().X, (int)cell.GetCoordinates().Y + 1];
+                        if (!leftCell.GetWalkable() && !rightCell.GetWalkable())
+                        {
+                            doors.Add(new Door(cell));
+                        } else if(!topCell.GetWalkable() && !bottomCell.GetWalkable())
+                        {
+                            doors.Add(new Door(cell));
+                        }
+                    }
+                }
+            }
+
+            AddExit();
+        }
+
+
+        private void AddExit()
+        {
+            int ranRoom = 0;
+
+            while(rooms[ranRoom].Contains(player.GetCell()))
+            {
+                ranRoom = Randomizer.RandomInt(0, rooms.Count);
+            }
+
+            Cell c = cells[(int)rooms[ranRoom].Center().X, (int)rooms[ranRoom].Center().Y];
+            new Exit(c);
         }
 
         private void CreateRooms()
@@ -197,6 +341,7 @@ namespace Rascii.Screen
             ConnectRooms();
             // Need to spawn the player after map generation, else sometimes the halls overwrite the player.
             player = new Player(cells[(int)rooms[0].Center().X, (int)rooms[0].Center().Y]);
+            AddDoors();
         }
 
         private void ConnectRooms()
@@ -334,6 +479,10 @@ namespace Rascii.Screen
                     {
                         Enemy enemy = (Enemy)cell.GetEntity();
                         player.Attack(enemy);
+                    } else if (cell.GetEntity().entityType == EntityTypes.DOOR)
+                    {
+                        Door door = (Door)cell.GetEntity();
+                        door.OpenDoor();
                     }
                 }
                 playerTurn = false;
@@ -352,6 +501,11 @@ namespace Rascii.Screen
                         Enemy enemy = (Enemy)cell.GetEntity();
                         player.Attack(enemy);
                     }
+                    else if (cell.GetEntity().entityType == EntityTypes.DOOR)
+                    {
+                        Door door = (Door)cell.GetEntity();
+                        door.OpenDoor();
+                    }
                 }
                 playerTurn = false;
             }
@@ -368,6 +522,11 @@ namespace Rascii.Screen
                     {
                         Enemy enemy = (Enemy)cell.GetEntity();
                         player.Attack(enemy);
+                    }
+                    else if (cell.GetEntity().entityType == EntityTypes.DOOR)
+                    {
+                        Door door = (Door)cell.GetEntity();
+                        door.OpenDoor();
                     }
                 }
                 playerTurn = false;
@@ -386,12 +545,22 @@ namespace Rascii.Screen
                         Enemy enemy = (Enemy)cell.GetEntity();
                         player.Attack(enemy);
                     }
+                    else if (cell.GetEntity().entityType == EntityTypes.DOOR)
+                    {
+                        Door door = (Door)cell.GetEntity();
+                        door.OpenDoor();
+                    }
                 }
                 playerTurn = false;
             }
             else if (keyState.IsKeyDown(KeyBindings.SKIP) && lastState.IsKeyUp(KeyBindings.SKIP))
             {
                 playerTurn = false;
+            }
+
+            if (keyState.IsKeyDown(KeyBindings.PROCEED) && lastState.IsKeyUp(KeyBindings.PROCEED))
+            {
+                GameManager.game.GetPane("map").SetContent(new Map(player, x, y));
             }
 
             lastState = keyState;

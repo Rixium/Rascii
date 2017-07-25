@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Rascii.Constants
+﻿namespace Rascii.Constants
 {
     public class EntityTypes
     {
@@ -12,6 +6,8 @@ namespace Rascii.Constants
         public static int PLAYER = 0;
         public static int ENEMY = 1;
         public static int ITEM = 2;
+        public static int DOOR = 3;
+        public static int EXIT = 4;
 
     }
 }

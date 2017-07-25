@@ -7,7 +7,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D55A6A80-30FF-4D23-B803-3551B2B89FB0}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Rascii</RootNamespace>
     <AssemblyName>Rascii</AssemblyName>
@@ -41,6 +41,9 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Constants\CellColors.cs" />
     <Compile Include="Constants\EnemyTypes.cs" />
@@ -53,9 +56,11 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Screen\Content.cs" />
+    <Compile Include="Screen\Exit.cs" />
     <Compile Include="Screen\Inventory.cs" />
     <Compile Include="Screen\Map.cs" />
     <Compile Include="Screen\MapClasses\Cell.cs" />
+    <Compile Include="Screen\MapClasses\Door.cs" />
     <Compile Include="Screen\MapClasses\Enemy.cs" />
     <Compile Include="Screen\MapClasses\Entity.cs" />
     <Compile Include="Screen\MapClasses\EntityStats.cs" />
