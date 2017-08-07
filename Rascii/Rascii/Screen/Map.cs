@@ -25,6 +25,8 @@ namespace Rascii.Screen
         private List<Door> doors = new List<Door>();
         private bool playerTurn = true;
 
+        private int buttonTimer = 0;
+        
         Random random;
 
         KeyboardState lastState;
@@ -176,6 +178,8 @@ namespace Rascii.Screen
 
             Populate();
             player = p;
+            player.GetCell().RemoveEntity();
+            GameManager.player = player;
             player.SetCell(cells[(int)rooms[0].Center().X, (int)rooms[0].Center().Y]);
 
             cells[(int)player.GetCell().GetCoordinates().X + 1, (int)player.GetCell().GetCoordinates().Y].SetValue("<");
@@ -191,10 +195,16 @@ namespace Rascii.Screen
             {
                 if(!cell.HasEntity() && cell.GetWalkable())
                 {
-                    if(r.Next(0, 1000) < 10)
+                    if(r.Next(0, 200) < 10)
                     {
+                        int chance = r.Next(0, 100);
+                        
                         int enemyType = r.Next(0, EnemyTypes.ENEMYTYPES);
-                        cell.AddEntity(new Enemy(1, enemyType));
+
+                        if (chance <= ContentChest.Instance.enemyChance[enemyType] * GameManager.player.GetStats().level)
+                        {
+                            cell.AddEntity(new Enemy(GameManager.player.GetStats().level, enemyType));
+                        }
                     }
                 }
             }
@@ -466,7 +476,7 @@ namespace Rascii.Screen
             KeyboardState keyState = Keyboard.GetState();
 
             Cell playersCell = player.GetCell();
-            if (keyState.IsKeyDown(KeyBindings.LEFT) && lastState.IsKeyUp(KeyBindings.LEFT))
+            if (keyState.IsKeyDown(KeyBindings.LEFT) && (lastState.IsKeyUp(KeyBindings.LEFT) || buttonTimer >= Project.buttonWaitTime))
             {
                 Cell cell = cells[(int)playersCell.GetCoordinates().X - 1, (int)playersCell.GetCoordinates().Y];
                 if (cell.GetWalkable())
@@ -486,8 +496,9 @@ namespace Rascii.Screen
                     }
                 }
                 playerTurn = false;
+                buttonTimer = 0;
             }
-            else if (keyState.IsKeyDown(KeyBindings.RIGHT) && lastState.IsKeyUp(KeyBindings.RIGHT))
+            else if (keyState.IsKeyDown(KeyBindings.RIGHT) && (lastState.IsKeyUp(KeyBindings.RIGHT) || buttonTimer >= Project.buttonWaitTime))
             {
                 Cell cell = cells[(int)playersCell.GetCoordinates().X + 1, (int)playersCell.GetCoordinates().Y];
                 if (cell.GetWalkable())
@@ -508,8 +519,9 @@ namespace Rascii.Screen
                     }
                 }
                 playerTurn = false;
+                buttonTimer = 0;
             }
-            else if (keyState.IsKeyDown(KeyBindings.UP) && lastState.IsKeyUp(KeyBindings.UP))
+            else if (keyState.IsKeyDown(KeyBindings.UP) && (lastState.IsKeyUp(KeyBindings.UP) || buttonTimer >= Project.buttonWaitTime))
             {
                 Cell cell = cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y - 1];
                 if (cell.GetWalkable())
@@ -530,8 +542,9 @@ namespace Rascii.Screen
                     }
                 }
                 playerTurn = false;
+                buttonTimer = 0;
             }
-            else if (keyState.IsKeyDown(KeyBindings.DOWN) && lastState.IsKeyUp(KeyBindings.DOWN))
+            else if (keyState.IsKeyDown(KeyBindings.DOWN) && (lastState.IsKeyUp(KeyBindings.DOWN) || buttonTimer >= Project.buttonWaitTime))
             {
                 Cell cell = cells[(int)playersCell.GetCoordinates().X, (int)playersCell.GetCoordinates().Y + 1];
                 if (cell.GetWalkable())
@@ -552,16 +565,25 @@ namespace Rascii.Screen
                     }
                 }
                 playerTurn = false;
+                buttonTimer = 0;
             }
-            else if (keyState.IsKeyDown(KeyBindings.SKIP) && lastState.IsKeyUp(KeyBindings.SKIP))
+            else if (keyState.IsKeyDown(KeyBindings.SKIP) && (lastState.IsKeyUp(KeyBindings.SKIP) || buttonTimer >= Project.buttonWaitTime))
             {
                 playerTurn = false;
+                buttonTimer = 0;
             }
 
             if (keyState.IsKeyDown(KeyBindings.PROCEED) && lastState.IsKeyUp(KeyBindings.PROCEED))
             {
-                GameManager.game.GetPane("map").SetContent(new Map(player, x, y));
+                if (player.GetCell().GetValue() == ">")
+                {
+                    player.LevelUp();
+                    GameManager.game.GetPane("map").SetContent(new Map(player, x, y));
+                }
+                buttonTimer = 0;
             }
+
+            buttonTimer++;
 
             lastState = keyState;
         }

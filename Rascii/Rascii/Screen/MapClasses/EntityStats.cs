@@ -30,8 +30,8 @@ namespace Rascii.Screen.MapClasses
             defence = Dice.Roll(1, 3) + level / 3;
             defenceChance = Dice.Roll(10, 4);
             gold = Dice.Roll(5, 5);
-            currHealth = 10;
-            maxHealth = 10;
+            currHealth = 10 * level;
+            maxHealth = 10 * level;
             speed = 14;
         }
     }

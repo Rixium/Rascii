@@ -19,6 +19,7 @@ namespace Rascii.Util {
         public Dictionary<int, string> names = new Dictionary<int, string>();
         public Dictionary<int, string> values = new Dictionary<int, string>();
         public Dictionary<int, Color> enemyColors = new Dictionary<int, Color>();
+        public Dictionary<int, int> enemyChance = new Dictionary<int, int>();
 
         public static ContentChest Instance {
             get {
@@ -33,12 +34,19 @@ namespace Rascii.Util {
             pixel = content.Load<Texture2D>("Misc/pixel");
             gamefont = content.Load<SpriteFont>("fonts/gamefont");
 
-            names.Add(EnemyTypes.KOBOLD, "Kobold");
-            values.Add(EnemyTypes.KOBOLD, "k");
-            enemyColors.Add(EnemyTypes.KOBOLD, Swatch.DbBrightWood);
-            names.Add(EnemyTypes.GOBLIN, "Goblin");
-            values.Add(EnemyTypes.GOBLIN, "g");
-            enemyColors.Add(EnemyTypes.GOBLIN, Swatch.DbGrass);
+            CreateEnemy(EnemyTypes.KOBOLD, "Kobold", "k", 50, Swatch.DbBrightWood);
+            CreateEnemy(EnemyTypes.GOBLIN, "Goblin", "g", 20, Swatch.DbGrass);
+            CreateEnemy(EnemyTypes.SPIDER, "Spider", "s", 70, Swatch.AlternateLighter);
+            CreateEnemy(EnemyTypes.WOLF, "Wolf", "w", 30, Swatch.DbOldStone);
+            CreateEnemy(EnemyTypes.DRAGON, "Dragon", "D", 1, Swatch.DbBlood);
+        }
+
+        private void CreateEnemy(int type, string name, string value, int chance, Color color)
+        {
+            names.Add(type, name);
+            values.Add(type, value);
+            enemyColors.Add(type, color);
+            enemyChance.Add(type, chance);
         }
 
     }

@@ -41,6 +41,14 @@ namespace Rascii.Screen.MapClasses
             stats.speed = 10;
         }
         
+        public void LevelUp()
+        {
+            stats.level++;
+            stats.attack++;
+            stats.defence++;
+            stats.maxHealth += 10;
+            stats.currHealth++;
+        }
 
         public Cell GetCell()
         {

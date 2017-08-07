@@ -25,5 +25,7 @@
 
         public static int panePadding = 10;
         public static int linePadding = 5;
+
+        public static int buttonWaitTime = 10;
     }
 }
